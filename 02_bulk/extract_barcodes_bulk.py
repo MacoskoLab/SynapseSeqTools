@@ -196,6 +196,7 @@ def main(
     a=rd1_length-1
     log.info(f'Read 1 is {a} nt long')
 
+
     log.info("Saving only the sequence lines from read 1")
     command = [f'zcat {fastq_r1} | awk \'NR%4==2\' > rd1_stripped.fastq']
     result = subprocess.run(command, cwd=output_dir, shell=True, capture_output=True)
@@ -208,6 +209,16 @@ def main(
     command = [f'paste rd1_stripped.fastq rd2_stripped.fastq | gzip > merged.fastq.gz']
     result = subprocess.run(command, cwd=output_dir, shell=True, capture_output=True)
 
+    # sleep for 5 seconds
+    time.sleep(5)
+
+    # # gzip the read 1 and read 2 files
+    command = [f'gzip rd1_stripped.fastq']
+    result = subprocess.run(command, cwd=output_dir, shell=True, capture_output=True)
+
+    command = [f'gzip rd2_stripped.fastq']
+    result = subprocess.run(command, cwd=output_dir, shell=True, capture_output=True)
+    
     log.info("Fuzzy grep-ing for polyA constant sequence")
     print(constant_sequence_pretag)
     command = [f'zcat merged.fastq.gz | {ug_exec_path} -Z3 {constant_sequence_pretag} | gzip > merged_preFilt.fastq.gz']

@@ -66,8 +66,8 @@ for inx, row in sample_df.iterrows():
     os.makedirs(out_dir, exist_ok=True)
 
     # create command
-    
-    cmd = f"python {bulk_parse_fastq_path} {r1_path} {r2_path} --output-dir {out_dir}"
+    out_log_file = os.path.join(out_dir, f"{sample_id}.log")
+    cmd = f"python {bulk_parse_fastq_path} {r1_path} {r2_path} --output-dir {out_dir} > {out_log_file} 2>&1"
     if len(prepend_path) > 0:
         cmd = f"{prepend_path} '{cmd}'"
     cmd_tup = (sample_id, cmd)
@@ -89,7 +89,7 @@ if use_slurm:
             f.write(f"#SBATCH --output={out_path}\n")
             f.write(f"#SBATCH --error={err_path}\n")
             f.write(f"#SBATCH --time=24:00:00\n")
-            f.write(f"#SBATCH --cpus-per-task=3\n")
+            f.write(f"#SBATCH --cpus-per-task=2\n")
             f.write(f"#SBATCH --mem={MEM}\n")
             f.write(f"#SBATCH --nodes=1\n")
             f.write(f"#SBATCH --ntasks=1\n")
