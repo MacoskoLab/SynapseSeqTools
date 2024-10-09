@@ -46,7 +46,6 @@ prepend_path = config["prepend_cmds_path"]
 # read in samplesheet
 sample_df = pd.read_csv(args.samplesheet, sep=',')
 
-
 cmds_list = []
 
 for inx, row in sample_df.iterrows():
@@ -61,13 +60,16 @@ for inx, row in sample_df.iterrows():
     assert os.path.exists(r1_path), f"r1 file {r1_path} does not exist"
     assert os.path.exists(r2_path), f"r2 file {r2_path} does not exist"
 
-    out_dir_general = row['out_dir_general']
+    out_dir_extract = row['out_dir_extract']
     sample_id = row['sample_id']
-    out_dir = os.path.join(out_dir_general, sample_id)
+    out_dir = os.path.join(out_dir_extract, sample_id)
     os.makedirs(out_dir, exist_ok=True)
 
     # create command
-    cmd = f"{prepend_path} 'python {bulk_parse_fastq_path} {r1_path} {r2_path} --output-dir {out_dir}'"
+    
+    cmd = f"python {bulk_parse_fastq_path} {r1_path} {r2_path} --output-dir {out_dir}"
+    if len(prepend_path) > 0:
+        cmd = f"{prepend_path} '{cmd}'"
     cmd_tup = (sample_id, cmd)
     cmds_list.append(cmd_tup)
 
@@ -101,3 +103,5 @@ else:
     with open(out_path, "w") as f:
         for cmd in cmds_list:
             f.write(f"{cmd[1]}\n")
+
+
