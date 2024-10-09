@@ -1,4 +1,8 @@
 #ignore .ipynb_checkpoints
-.ipynb_checkpoints
+*.ipynb_checkpoints
+#ignore .DS_Store
+*.DS_Store
+03_create_pool_ref/cmd_sheets/
+03_create_pool_ref/samplesheets/
 
 

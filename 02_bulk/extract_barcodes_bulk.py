@@ -15,12 +15,23 @@ import scipy.sparse
 from matplotlib.backends.backend_pdf import PdfPages
 from sklearn.neighbors import radius_neighbors_graph
 
-# from slideseq.util.logger import create_logger
+import yaml
 
 import subprocess
 import os
 
 log = logging.getLogger("barcode_matrix")
+
+# get current file path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# set config yaml path as one directory above current file path
+config_dir = os.path.dirname(current_dir)
+config_path = os.path.join(config_dir, "config.yaml")
+with open(config_path, "r") as stream:
+    config = yaml.safe_load(stream)
+
+ug_exec_path = config["ugrep_path"]
+vt_start_index_r2 = config["vt_start_index_r2"]
 
 
 DEGENERATE_BASE_DICT = {
@@ -171,11 +182,8 @@ def main(
     """
     # create_logger(debug, dryrun=False)
 
-    try:
-        os.mkdir(output_dir)
-    except:
-        print('Path already exists')
-
+    # make output directory recursively
+    os.makedirs(output_dir, exist_ok=True)
 
     output_dir = Path(output_dir)
     log.info(f"Saving output to {output_dir}")
@@ -187,7 +195,6 @@ def main(
     rd1_length=int(rd1_length)
     a=rd1_length-1
     log.info(f'Read 1 is {a} nt long')
-
 
     log.info("Saving only the sequence lines from read 1")
     command = [f'zcat {fastq_r1} | awk \'NR%4==2\' > rd1_stripped.fastq']
@@ -201,18 +208,17 @@ def main(
     command = [f'paste rd1_stripped.fastq rd2_stripped.fastq | gzip > merged.fastq.gz']
     result = subprocess.run(command, cwd=output_dir, shell=True, capture_output=True)
 
-
     log.info("Fuzzy grep-ing for polyA constant sequence")
     print(constant_sequence_pretag)
-    command = [f'zcat merged.fastq.gz | /broad/macosko/mkim/Scripts/ugrep/bin/ug -Z3 \"{constant_sequence_pretag}\" | gzip > merged_preFilt.fastq.gz']
+    command = [f'zcat merged.fastq.gz | {ug_exec_path} -Z3 {constant_sequence_pretag} | gzip > merged_preFilt.fastq.gz']
     result = subprocess.run(command, cwd=output_dir, shell=True, capture_output=True, text=True)
 
     log.info("Fuzzy grep-ing for WPRE constant sequence")
     print(constant_sequence_posttag)
-    command = [f'zcat merged_preFilt.fastq.gz | /broad/macosko/mkim/Scripts/ugrep/bin/ug -Z3 \"{constant_sequence_posttag}\" | gzip > merged_preFilt_postFilt.fastq.gz']
+    command = [f'zcat merged_preFilt.fastq.gz | {ug_exec_path} -Z3 {constant_sequence_posttag} | gzip > merged_preFilt_postFilt.fastq.gz']
     result = subprocess.run(command, cwd=output_dir, shell=True, capture_output=True, text=True)
 
-    bc_start = rd1_length+26
+    bc_start = rd1_length + vt_start_index_r2
     bc_end = bc_start+31
   
     log.info("Cutting out the identifiers/UMIs")
