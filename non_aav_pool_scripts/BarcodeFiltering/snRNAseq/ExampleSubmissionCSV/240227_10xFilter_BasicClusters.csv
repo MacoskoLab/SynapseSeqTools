@@ -1,0 +1,2 @@
+﻿o,parent_dir,output_dir,target_datasets,custom_prefix,cluster_identity_dir,custom_cluster,perc_cutoff_list
+1,/broad/macosko/mkim/SynapseSeq/240215_Goofy/snrna/dialout,/broad/macosko/mkim/SynapseSeq/240215_Goofy/snrna/dialout_filtered,Goofy_C1;Goofy_D1;Goofy_E1;Goofy_F1;Goofy_I1;Goofy_J1,1,/broad/macosko/mkim/SynapseSeq/240215_Goofy/snrna/library/240228_CellsByCluster,-10,0.2;0.1
